@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod_clean_architecture/core/constants/app_constants.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_riverpod_clean_architecture/features/home/presentation/screens/home_list_screen.dart';
+import 'package:flutter_riverpod_clean_architecture/features/home/presentation/screens/home_detail_screen.dart';
 
+import 'package:flutter_riverpod_clean_architecture/features/favourite/presentation/screens/favourite_list_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -17,6 +20,29 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // Home route
+      GoRoute(
+        path: AppConstants.homeRoute,
+        name: 'home',
+        builder: (context, state) => const MovieListScreen(),
+        routes: [
+          // Photo detail route
+          GoRoute(
+            path: '/movie/:id',
+            name: 'photo_detail',
+            builder: (context, state) {
+              final photoId = int.tryParse(state.pathParameters['id'] ?? '');
+              return MovieDetailScreen(movieId: photoId);
+            },
+          ),
+          // Favourites list route
+          GoRoute(
+            path: 'favourites',
+            name: 'favourites',
+            builder: (context, state) => const FavouriteListScreen(),
+          ),
+        ],
+      ),
 
       // Login route
       GoRoute(
