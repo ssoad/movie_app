@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod_clean_architecture/core/constants/app_constants.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_riverpod_clean_architecture/features/home/presentation/providers/tab_index_provider.dart';
 import 'package:flutter_riverpod_clean_architecture/core/ui/buttons/app_button.dart';
 import 'package:flutter_riverpod_clean_architecture/core/ui/dialogs/app_dialog.dart';
 
@@ -21,6 +22,9 @@ class ProfileScreen extends ConsumerWidget {
 
     ref.listen(authProvider, (previous, next) {
       if (previous?.isAuthenticated == true && next.isAuthenticated == false) {
+        // Reset tab index to Home
+        ref.read(homeTabIndexProvider.notifier).state = 0;
+        // Redirect to login after logout
         context.go(AppConstants.loginRoute);
       }
     });

@@ -10,7 +10,8 @@ import 'dart:ui';
 
 import '../../providers/home_providers.dart';
 import '../widgets/movie_list_item.dart';
-
+import 'package:flutter_riverpod_clean_architecture/features/favourite/presentation/screens/favourite_list_screen.dart';
+import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/profile_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/home/presentation/providers/tab_index_provider.dart';
 
 class MovieListScreen extends ConsumerStatefulWidget {
@@ -192,8 +193,8 @@ class _MovieListScreenState extends ConsumerState<MovieListScreen> {
 
     final List<Widget> _pages = [
       homeBody,
-      homeBody,
-      homeBody
+      const FavouriteListScreen(),
+      const ProfileScreen(),
     ];
 
     final currentIndex = ref.watch(homeTabIndexProvider);
