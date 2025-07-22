@@ -13,11 +13,6 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    // Dummy user data for realism
-    const String avatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
-    const String name = 'John Doe';
-    const String email = 'john.doe@example.com';
-
     final authState = ref.watch(authProvider);
 
     ref.listen(authProvider, (previous, next) {
@@ -28,6 +23,28 @@ class ProfileScreen extends ConsumerWidget {
         context.go(AppConstants.loginRoute);
       }
     });
+
+    if (authState.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final user = authState.user;
+    if (user == null) {
+      // Not authenticated or user not loaded
+      return Scaffold(
+        body: Center(
+          child: Text(
+            'No user data available.',
+            style: theme.textTheme.bodyLarge,
+          ),
+        ),
+      );
+    }
+
+    final avatarUrl =
+        user.profilePicture ?? 'https://randomuser.me/api/portraits/men/32.jpg';
+    final name = user.name;
+    final email = user.email;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,

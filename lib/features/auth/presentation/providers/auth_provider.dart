@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/domain/entities/user_entity.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/login_use_case.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/logout_use_case.dart';
+import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/get_current_user_use_case.dart';
 
 // Auth state
 class AuthState {
@@ -36,13 +37,18 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
+  final GetCurrentUserUseCase _getCurrentUserUseCase;
 
   AuthNotifier({
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
+    required GetCurrentUserUseCase getCurrentUserUseCase,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
-       super(const AuthState());
+       _getCurrentUserUseCase = getCurrentUserUseCase,
+       super(const AuthState()) {
+    getCurrentUser();
+  }
 
   // Check auth status
   Future<void> checkAuthStatus() async {
@@ -79,7 +85,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-
   // Logout
   Future<void> logout() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -101,15 +106,39 @@ class AuthNotifier extends StateNotifier<AuthState> {
           ),
     );
   }
+
+  // Get current user
+  Future<void> getCurrentUser() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final result = await _getCurrentUserUseCase.execute();
+    result.fold(
+      (failure) =>
+          state = state.copyWith(
+            isLoading: false,
+            isAuthenticated: false,
+            user: null,
+            errorMessage: failure.message,
+          ),
+      (user) =>
+          state = state.copyWith(
+            isLoading: false,
+            isAuthenticated: true,
+            user: user,
+            errorMessage: null,
+          ),
+    );
+  }
 }
 
 // Auth provider
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final loginUseCase = ref.watch(loginUseCaseProvider);
   final logoutUseCase = ref.watch(logoutUseCaseProvider);
+  final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
 
   return AuthNotifier(
     loginUseCase: loginUseCase,
     logoutUseCase: logoutUseCase,
+    getCurrentUserUseCase: getCurrentUserUseCase,
   );
 });
