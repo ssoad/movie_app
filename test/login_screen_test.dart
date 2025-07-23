@@ -10,6 +10,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod_clean_architecture/core/error/failures.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/login_use_case.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/logout_use_case.dart';
+import 'package:flutter_riverpod_clean_architecture/features/auth/domain/usecases/get_current_user_use_case.dart';
 
 // Fake LoginUseCase
 class FakeLoginUseCase extends LoginUseCase {
@@ -74,13 +75,30 @@ final fakeLogoutUseCaseProvider = Provider<LogoutUseCase>(
   (ref) => FakeLogoutUseCase(),
 );
 
+class FakeGetCurrentUserUseCase extends GetCurrentUserUseCase {
+  FakeGetCurrentUserUseCase() : super(FakeAuthRepository());
+}
+
+final fakeGetCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>(
+  (ref) => FakeGetCurrentUserUseCase(),
+);
+
 // A fake AuthNotifier for testing
 class FakeAuthNotifier extends AuthNotifier {
   FakeAuthNotifier()
     : super(
         loginUseCase: FakeLoginUseCase(),
         logoutUseCase: FakeLogoutUseCase(),
-      );
+        getCurrentUserUseCase: FakeGetCurrentUserUseCase(),
+      ) {
+    // Ensure initial state is unauthenticated for the test
+    state = const AuthState(
+      isAuthenticated: false,
+      isLoading: false,
+      user: null,
+      errorMessage: null,
+    );
+  }
 }
 
 void main() {
@@ -99,6 +117,9 @@ void main() {
           ),
           loginUseCaseProvider.overrideWithProvider(fakeLoginUseCaseProvider),
           logoutUseCaseProvider.overrideWithProvider(fakeLogoutUseCaseProvider),
+          getCurrentUserUseCaseProvider.overrideWithProvider(
+            fakeGetCurrentUserUseCaseProvider,
+          ),
         ],
         child: MaterialApp(home: LoginScreen()),
       ),
